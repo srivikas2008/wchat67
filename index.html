@@ -3,20 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>wchat67 - Login</title>
-    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-      <div class="card">
-        <h2>Account Login</h2>
-        <input type="text" id="username" placeholder="Username">
-<input type="password" id="password" placeholder="Password">
-<button onclick="handleAuth(true)">Login</button>
-<button onclick="handleAuth(false)">Sign Up</button>
-        <button id="loginBtn" class="btn" onclick="handleLogin()">Log In</button>
-        <p>New here? <a href="signup.html">Sign up</a></p>
-      </div>
-    </div>
-    <script src="script.js"></script>
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email" required>
+    <input type="password" id="loginPassword" placeholder="Password" required>
+    <button onclick="handleLogin()">Log In</button>
+    <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
+
+    <script type="module" src="script.js"></script>
 </body>
 </html>
