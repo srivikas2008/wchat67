@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>wchat67 - Network Security & Registry Control</title>
+  <style>
+    body { background: #0f172a; color: #e2e8f0; font-family: sans-serif; padding: 40px; margin: 0; }
+    .container { max-width: 600px; margin: 0 auto; background: #1e293b; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    h2, h3 { color: #38bdf8; margin-top: 0; }
+    .section { border-bottom: 1px solid #334155; padding-bottom: 20px; margin-bottom: 20px; }
+    input { padding: 10px; background: #334155; border: 1px solid #475569; border-radius: 4px; color: #fff; width: 70%; }
+    button { padding: 10px 15px; background: #38bdf8; border: none; color: #0f172a; font-weight: bold; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #0ea5e9; }
+    .item-list { list-style: none; padding: 0; }
+    .item-list li { padding: 10px; background: #334155; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+    .back-btn { display: inline-block; margin-bottom: 20px; color: #94a3b8; text-decoration: none; font-size: 14px; }
+    .avatar-grid { display: flex; gap: 10px; margin-top: 10px; }
+    .avatar-opt { font-size: 28px; cursor: pointer; padding: 5px; border: 2px solid transparent; border-radius: 8px; }
+    .avatar-opt:hover, .avatar-opt.selected { border-color: #38bdf8; background: #334155; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="chat.html" class="back-btn">⬅️ Return to Core Mesh</a>
+    <h2>Control Center Node: <span id="node-name">...</span></h2>
+
+    <div class="section">
+      <h3>Profile Custom Avatar Signature</h3>
+      <div class="avatar-grid">
+        <span class="avatar-opt" onclick="setAvatar('🤖')">🤖</span>
+        <span class="avatar-opt" onclick="setAvatar('🐱')">🐱</span>
+        <span class="avatar-opt" onclick="setAvatar('🦊')">🦊</span>
+        <span class="avatar-opt" onclick="setAvatar('🥷')">🥷</span>
+        <span class="avatar-opt" onclick="setAvatar('🚀')">🚀</span>
+      </div>
+      <p style="font-size:14px; color:#94a3b8;">Current Node Identity: <span id="current-avatar-view">🤖</span></p>
+    </div>
+
+    <div class="section">
+      <h3>Establish New Connection Pipeline</h3>
+      <input type="text" id="target-user" placeholder="Target Registry Node Username">
+      <button onclick="sendRequest()">Send Link Request</button>
+    </div>
+
+    <div class="section">
+      <h3>Pending Inbound Connections</h3>
+      <ul id="request-list" class="item-list"></ul>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://wchat-backend-xcjq.onrender.com";
+    const me = localStorage.getItem("wchat_user");
+    const token = localStorage.getItem("wchat_token");
+
+    if (!token) window.location.href = "index.html";
+    document.getElementById("node-name").innerText = me;
+
+    async function loadData() {
+      const res = await fetch(`${API_URL}/friend-profile`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json();
+      
+      document.getElementById("current-avatar-view").innerText = data.avatar || "🤖";
+      
+      document.querySelectorAll(".avatar-opt").forEach(opt => {
+        opt.classList.toggle("selected", opt.innerText === data.avatar);
+      });
+
+      const reqList = document.getElementById("request-list");
+      reqList.innerHTML = "";
+      if(data.receivedRequests.length === 0) {
+        reqList.innerHTML = `<li style="color:#94a3b8; font-size:14px;">No inbound link signals active.</li>`;
+      }
+      data.receivedRequests.forEach(sender => {
+        const li = document.createElement("li");
+        li.innerHTML = `<span>✉️ ${sender}</span> <button onclick="acceptRequest('${sender}')">Accept Link</button>`;
+        reqList.appendChild(li);
+      });
+    }
+
+    async function setAvatar(emoji) {
+      const res = await fetch(`${API_URL}/update-avatar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: me, avatar: emoji })
+      });
+      if (res.ok) {
+        loadData();
+      } else {
+        alert("Failed to save avatar configuration.");
+      }
+    }
+
+    async function sendRequest() {
+      const target = document.getElementById("target-user").value.trim();
+      if (!target) return;
+      const res = await fetch(`${API_URL}/friend-request/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sender: me, targetUsername: target })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Link request packet transmitted successfully.");
+        document.getElementById("target-user").value = "";
+      } else {
+        alert("Error: " + data.error);
+      }
+    }
+
+    async function acceptRequest(target) {
+      const res = await fetch(`${API_URL}/friend-request/accept`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: me, targetUsername: target })
+      });
+      if (res.ok) {
+        alert("Pipeline synced! Node added to friends mesh.");
+        loadData();
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+/* --- Cyberpunk Orange, Black, Blue & White Theme Sheet --- */
+:root {
+  --bg-main: #090d16;        /* Deep carbon black background */
+  --bg-sidebar: #131a26;     /* Lighter card black for sidebar */
+  --bg-header: #1b2537;      /* Structural panel blocks */
+  --text-primary: #f8fafc;   
+  --text-muted: #64748b;     
+  --accent-color: #ff6b00;   /* Neon Orange branding element */
+  --accent-hover: #ff8533;   
+  
+  /* Your requested message bubble colors */
+  --bubble-sent: #0284c7;    /* Sleek electric blue bubble */
+  --bubble-recv: #f8fafc;    /* Crisp clean white bubble */
+  --bubble-recv-text: #0f172a; /* Dark text for readability on white bubble */
+  
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+  background: var(--bg-main); 
+  height: 100vh; 
+  display: flex; 
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+.app-container { display: flex; width: 100%; height: 100vh; overflow: hidden; }
+
+/* --- Sidebar System --- */
+.sidebar { 
+  width: 30%; 
+  background: var(--bg-sidebar); 
+  border-right: 1px solid rgba(255, 255, 255, 0.05); 
+  display: flex; 
+  flex-direction: column; 
+}
+.panel-header { 
+  padding: 18px 15px; 
+  background: var(--bg-sidebar); 
+  font-weight: 600; 
+  color: var(--text-primary); 
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+}
+.user-list { list-style: none; overflow-y: auto; flex: 1; }
+
+.user-item { 
+  padding: 15px; 
+  border-bottom: 1px solid rgba(255,255,255,0.02); 
+  cursor: pointer; 
+  color: var(--text-muted); 
+  font-weight: 500; 
+  position: relative;
+  transition: all 0.25s var(--ease-smooth);
+  border-left: 0px solid transparent;
+}
+.user-item:hover { 
+  background: rgba(255, 255, 255, 0.02); 
+  color: var(--text-primary);
+}
+.user-item.active { 
+  background: rgba(255, 107, 0, 0.06); 
+  color: var(--accent-color); 
+  border-left: 4px solid var(--accent-color); 
+}
+
+/* --- Chat Core Grid Spaces --- */
+.chat-area { width: 70%; background: var(--bg-main); display: flex; flex-direction: column; position: relative; }
+.chat-header { 
+  padding: 18px 15px; 
+  background: var(--bg-sidebar); 
+  font-weight: 600; 
+  color: var(--text-primary); 
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+}
+.messages-container { 
+  flex: 1; 
+  padding: 24px; 
+  overflow-y: auto; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 12px; 
+}
+
+/* --- Premium Custom Message Bubbles (Blue & White) --- */
+.message { 
+  max-width: 65%; 
+  padding: 12px 18px; 
+  border-radius: 16px; 
+  font-size: 15px; 
+  line-height: 1.5; 
+  word-wrap: break-word; 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transform-origin: bottom center;
+  animation: popBubble 0.3s var(--ease-spring) forwards;
+}
+
+/* Sent: Electric Blue, white text */
+.message.sent { 
+  background: var(--bubble-sent); 
+  align-self: flex-end; 
+  border-bottom-right-radius: 4px; 
+  color: #ffffff; 
+}
+
+/* Received: Crisp White, dark slate text */
+.message.received { 
+  background: var(--bubble-recv); 
+  align-self: flex-start; 
+  border-bottom-left-radius: 4px; 
+  color: var(--bubble-recv-text); 
+}
+
+@keyframes popBubble {
+  from { opacity: 0; transform: translateY(15px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* --- Input Tray Layout --- */
+.input-tray { 
+  padding: 15px 20px; 
+  background: var(--bg-sidebar); 
+  display: flex; 
+  align-items: center; 
+  gap: 15px; 
+  border-top: 1px solid rgba(255, 255, 255, 0.05); 
+}
+.input-tray form { display: flex; width: 100%; gap: 12px; }
+.chat-input { 
+  flex: 1; 
+  padding: 14px; 
+  background: var(--bg-main);
+  border: 1px solid rgba(255, 255, 255, 0.05); 
+  border-radius: 8px; 
+  font-size: 15px; 
+  color: var(--text-primary);
+  outline: none; 
+  transition: all 0.25s var(--ease-smooth);
+}
+.chat-input:focus { 
+  border-color: var(--accent-color); 
+  box-shadow: 0 0 10px rgba(255, 107, 0, 0.15);
+}
+.chat-input:disabled { background: var(--bg-sidebar); opacity: 0.4; }
+
+.btn-send { 
+  padding: 0 24px; 
+  background: var(--accent-color); 
+  color: #000000; 
+  border: none; 
+  border-radius: 8px; 
+  font-weight: 700; 
+  cursor: pointer; 
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px var(--accent-orange-glow);
+}
+.btn-send:hover:not(:disabled) { 
+  background: var(--accent-hover); 
+  transform: translateY(-1px);
+}
+.btn-send:active:not(:disabled) { transform: translateY(0) scale(0.96); }
+.btn-send:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; }
+
+/* --- Popover Drawer Animation --- */
+.emoji-btn { font-size: 24px; cursor: pointer; background: none; border: none; outline: none; transition: transform 0.2s var(--ease-spring); }
+.emoji-btn:hover { transform: scale(1.18); }
+
+.emoji-drawer { 
+  position: absolute; 
+  bottom: 80px; 
+  left: 20px; 
+  background: var(--bg-sidebar); 
+  border: 1px solid rgba(255, 255, 255, 0.08); 
+  border-radius: 12px; 
+  padding: 12px; 
+  display: none; 
+  grid-template-columns: repeat(6, 1fr); 
+  gap: 8px; 
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6); 
+  z-index: 1000; 
+  transform-origin: bottom left;
+  animation: traySlide 0.25s var(--ease-spring) forwards;
+}
+@keyframes traySlide {
+  from { opacity: 0; transform: scale(0.85) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.emoji-item { font-size: 22px; cursor: pointer; text-align: center; padding: 6px; border-radius: 6px; transition: all 0.1s; }
+.emoji-item:hover { background: rgba(255,255,255,0.05); transform: scale(1.2); }
+
+/* --- Glow Toast Alert --- */
+.toast-banner { 
+  position: fixed; 
+  top: -80px; 
+  right: 25px; 
+  background: var(--bg-sidebar); 
+  color: var(--text-primary); 
+  padding: 16px 28px; 
+  border-radius: 10px; 
+  font-weight: 600; 
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6); 
+  z-index: 99999; 
+  border-left: 4px solid var(--accent-color);
+  display: block !important; 
+  opacity: 0;
+  pointer-events: none;
+  transition: top 0.4s var(--ease-spring), opacity 0.3s ease;
+}
+.toast-banner.show {
+  top: 25px;
+  opacity: 1;
+  pointer-events: auto;
+  animation: bannerGlow 2s infinite alternate ease-in-out;
+}
+@keyframes bannerGlow {
+  from { box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 0px var(--accent-orange-glow); }
+  to { box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 15px var(--accent-orange-glow); }
+}

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>wchat67 - Mesh Network</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    body { background: #0f172a; color: #e2e8f0; font-family: sans-serif; margin: 0; display: flex; height: 100vh; }
+    #sidebar { width: 260px; background: #1e293b; border-right: 1px solid #334155; display: flex; flex-direction: column; }
+    .user-profile { padding: 15px; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; background: #111827; }
+    .profile-link { color: #38bdf8; text-decoration: none; font-size: 14px; font-weight: bold; cursor: pointer; }
+    #friend-list { flex: 1; overflow-y: auto; padding: 10px; }
+    .friend-item { padding: 12px; margin-bottom: 8px; background: #334155; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
+    .friend-item:hover, .friend-item.active { background: #475569; }
+    .avatar { font-size: 20px; }
+    #chat-area { flex: 1; display: flex; flex-direction: column; background: #0f172a; }
+    #chat-header { padding: 15px; background: #1e293b; border-bottom: 1px solid #334155; font-weight: bold; color: #38bdf8; }
+    #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+    .msg { max-width: 60%; padding: 10px 14px; border-radius: 8px; line-height: 1.4; word-wrap: break-word; }
+    .msg.sent { background: #0284c7; color: #fff; align-self: flex-end; }
+    .msg.received { background: #334155; color: #e2e8f0; align-self: flex-start; }
+    #input-area { padding: 15px; background: #1e293b; display: flex; gap: 10px; border-top: 1px solid #334155; }
+    #msg-input { flex: 1; padding: 12px; background: #334155; border: 1px solid #475569; border-radius: 6px; color: #fff; }
+    #send-btn { padding: 0 20px; background: #38bdf8; border: none; color: #0f172a; font-weight: bold; border-radius: 6px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div id="sidebar">
+    <div class="user-profile">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span id="my-avatar" class="avatar">🤖</span>
+        <span id="my-username" style="font-weight: bold;">User</span>
+      </div>
+      <a href="profile.html" class="profile-link">⚙️ Control</a>
+    </div>
+    <div id="friend-list"></div>
+  </div>
+
+  <div id="chat-area">
+    <div id="chat-header">Select an active node to establish sync pipeline</div>
+    <div id="messages"></div>
+    <div id="input-area">
+      <input type="text" id="msg-input" placeholder="Transmit packet..." disabled>
+      <button id="send-btn" onclick="sendMsg()" disabled>Send</button>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://wchat-backend-xcjq.onrender.com";
+    const me = localStorage.getItem("wchat_user");
+    const token = localStorage.getItem("wchat_token");
+    let activeFriend = null;
+    let socket;
+
+    if (!token) window.location.href = "index.html";
+
+    document.getElementById("my-username").innerText = me;
+
+    // Fetch user profile to display current avatar
+    async function loadMyProfile() {
+      const res = await fetch(`${API_URL}/friend-profile`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        document.getElementById("my-avatar").innerText = data.avatar || "🤖";
+      }
+    }
+
+    async function loadFriends() {
+      const res = await fetch(`${API_URL}/users`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const friends = await res.json();
+      const list = document.getElementById("friend-list");
+      list.innerHTML = "";
+      
+      friends.forEach(f => {
+        const item = document.createElement("div");
+        item.className = "friend-item";
+        if (activeFriend === f.username) item.classList.add("active");
+        item.innerHTML = `<span class="avatar">${f.avatar || '🤖'}</span> <span>${f.username}</span>`;
+        item.onclick = () => selectFriend(f.username);
+        list.appendChild(item);
+      });
+    }
+
+    async function selectFriend(name) {
+      activeFriend = name;
+      document.getElementById("chat-header").innerText = `Active Session: ${activeFriend}`;
+      document.getElementById("msg-input").disabled = false;
+      document.getElementById("send-btn").disabled = false;
+      
+      document.querySelectorAll(".friend-item").forEach(item => {
+        item.classList.toggle("active", item.innerText.includes(name));
+      });
+
+      const res = await fetch(`${API_URL}/messages/${activeFriend}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const history = await res.json();
+      const box = document.getElementById("messages");
+      box.innerHTML = "";
+      history.forEach(appendMessage);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function appendMessage(msg) {
+      const box = document.getElementById("messages");
+      const div = document.createElement("div");
+      div.className = `msg ${msg.sender === me ? 'sent' : 'received'}`;
+      div.innerText = msg.text;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function sendMsg() {
+      const input = document.getElementById("msg-input");
+      const text = input.value.trim();
+      if (!text || !activeFriend) return;
+
+      const packet = { sender: me, receiver: activeFriend, text: text };
+      socket.emit("privateMessage", packet);
+      appendMessage(packet);
+      input.value = "";
+    }
+
+    // Initialize Socket Network connection
+    socket = io(API_URL);
+    socket.emit("registerChatSession", me);
+
+    socket.on("privateMessage", (msg) => {
+      if (activeFriend === msg.sender) {
+        appendMessage(msg);
+      } else {
+        loadFriends(); // Refresh UI to trigger update notifications if needed
+      }
+    });
+
+    loadMyProfile();
+    loadFriends();
+  </script>
+</body>
+</html>
