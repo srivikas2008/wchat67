@@ -1,28 +1,29 @@
 const API_URL = "https://wchat-backend-xcjq.onrender.com";
 
-// Signup Logic
 const signupBtn = document.getElementById("signupBtn");
 if (signupBtn) {
   signupBtn.addEventListener("click", async () => {
-    const username = document.getElementById("signupUsername").value;
-    const password = document.getElementById("signupPassword").value;
+    const u = document.getElementById("signupUsername").value;
+    const p = document.getElementById("signupPassword").value;
+
+    console.log("Attempting to send:", { username: u, password: p });
 
     try {
       const res = await fetch(`${API_URL}/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username: u, password: p })
       });
       
+      const text = await res.text();
       if (res.ok) {
         alert("Success! Account created.");
         window.location.href = "index.html";
       } else {
-        const err = await res.text();
-        alert("Signup failed: " + err);
+        alert("Server rejected signup: " + text);
       }
     } catch (err) {
-      alert("❌ Connection error: " + err.message);
+      alert("Connection error: " + err.message);
     }
   });
 }
