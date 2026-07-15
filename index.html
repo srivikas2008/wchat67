@@ -6,12 +6,14 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="card">
-        <h2>Login</h2>
-        <input type="text" id="loginUsername" placeholder="Username" required>
-        <input type="password" id="loginPassword" placeholder="Password" required>
-        <button id="loginBtn" onclick="handleLogin()">Log In</button>
+    <div class="container">
+      <div class="card">
+        <h2>Account Login</h2>
+        <input type="text" id="loginUsername" class="input-field" placeholder="Username">
+        <input type="password" id="loginPassword" class="input-field" placeholder="Password">
+        <button id="loginBtn" class="btn" onclick="handleLogin()">Log In</button>
         <p>New here? <a href="signup.html">Sign up</a></p>
+      </div>
     </div>
     <script src="script.js"></script>
 </body>
