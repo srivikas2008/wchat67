@@ -1,28 +1,45 @@
-// Replace the entire content of script.js with this:
-const API_URL = "https://wchat-backend-xcjq.onrender.com";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-async function handleAuth(isLogin) {
-  const u = document.getElementById("username").value;
-  const p = document.getElementById("password").value;
-  const endpoint = isLogin ? "/login" : "/signup";
+// Replace these with your project details
+const SUPABASE_URL = 'https://irjloknpcaqaeerpndtd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_6D1l_VPeKetSorRgpD9sCg_8nQO1nlN';
 
-  const res = await fetch(API_URL + endpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: u, password: p })
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Handle Sign Up
+async function handleSignup() {
+  const email = document.getElementById("signupEmail").value;
+  const password = document.getElementById("signupPassword").value;
+
+  const { data, error } = await supabase.auth.signUp({
+    email: email,
+    password: password,
   });
 
-  const data = await res.json();
-  if (res.ok) {
-    if (isLogin) {
-      localStorage.setItem("wchat_token", data.token);
-      localStorage.setItem("wchat_user", u);
-      window.location.href = "chat.html";
-    } else {
-      alert("Registration successful. Please log in.");
-      window.location.reload();
-    }
+  if (error) {
+    alert("Error: " + error.message);
   } else {
-    alert("Error: " + (data.error || "Request failed"));
+    alert("Check your email for the confirmation link!");
   }
 }
+
+// Handle Login
+async function handleLogin() {
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: password,
+  });
+
+  if (error) {
+    alert("Error: " + error.message);
+  } else {
+    window.location.href = "chat.html";
+  }
+}
+
+// Expose functions to the window so HTML buttons can find them
+window.handleSignup = handleSignup;
+window.handleLogin = handleLogin;
